@@ -1,68 +1,80 @@
-import logging
+from typing import Any, Dict, List, Optional, Type
+from pydantic import BaseModel
 from langchain_groq import ChatGroq
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.runnables import RunnableSerializable
 
-from src.models.schemas import UserPreferences, DailyPlan
-from src.tools.weather_tool import get_weather_forecast
-from src.tools.rag_retriever import retrieve_travel_blogs
+from src.utils.config import settings
+from src.utils.config import setup_logger
+from src.utils.retry import retry_with_backoff
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 class BaseAgent:
-    """Base class for all Agents in the enterprise architecture."""
-    def __init__(self, model_name: str = "llama3-70b-8192", temperature: float = 0.7):
-        # Using Groq for blazingly fast inference
-        self.llm = ChatGroq(temperature=temperature, model_name=model_name)
-
-class DestinationAgent(BaseAgent):
-    """Responsible for intelligently recommending destinations."""
+    """
+    Abstract base class for all Voyager AI agents.
+    Handles LLM initialization, prompt rendering, and structured parsing execution.
+    """
     
-    def process(self, prefs: UserPreferences) -> str:
-        if prefs.destination:
-            return prefs.destination
-            
-        logger.info("Destination is blank. Inferring optimal location...")
-        prompt = PromptTemplate(
-            template="Suggest exactly ONE best travel destination for {duration} days on a {budget} budget focusing on {style}. Return only the City and Country.",
-            input_variables=["duration", "budget", "style"]
+    def __init__(self, name: str, model_name: str = "llama3-70b-8192", temperature: float = 0.2):
+        self.name = name
+        self.llm = ChatGroq(
+            temperature=temperature,
+            model_name=model_name,
+            api_key=settings.GROQ_API_KEY,
+            max_tokens=4096
         )
-        chain = prompt | self.llm
-        result = chain.invoke({
-            "duration": prefs.duration,
-            "budget": prefs.budget,
-            "style": prefs.style
-        })
-        return result.content.strip()
+        logger.info(f"Initialized agent {self.name} with model {model_name}")
 
-class PlannerAgent(BaseAgent):
-    """Breaks down destination into day-by-day logical loops incorporating RAG and Environment."""
-    
-    def process(self, destination: str, prefs: UserPreferences, weather: str, rag_context: str) -> list[DailyPlan]:
-        logger.info(f"Generating logical day plans for {destination}")
-        
-        # Here we tell the AI to use local secrets and adapt for weather
-        template = """You are a master Travel Concept Planner.
-        Create a high-level daily theme breakdown for a {duration}-day trip to {destination}.
-        
-        CRITICAL CONSTRAINTS:
-        1. Adapt to Weather Forecast: {weather}
-        2. Incorporate Hidden Secrets from RAG Vector DB: {rag_context}
-        
-        {format_instructions}
+    def create_chain(
+        self, 
+        system_prompt: str, 
+        output_schema: Optional[Type[BaseModel]] = None
+    ) -> RunnableSerializable:
         """
-        parser = PydanticOutputParser(pydantic_object=DailyPlan) # Simplified
+        Creates a LangChain runnable chain. If output_schema is provided, 
+        it enforces structured Pydantic output.
+        """
+        messages = [
+            ("system", system_prompt),
+            ("human", "{human_input}")
+        ]
         
-        # In a real app we parse a List[DailyPlan], skipping raw code implementation for brevity
-        # Returning mock objects based on robust schemas
-        days = []
-        for i in range(1, prefs.duration + 1):
-            theme = "Indoor Culture (Due to weather)" if "rain" in weather.lower() else "Outdoor Exploration"
+        prompt = ChatPromptTemplate.from_messages(messages)
+        
+        if output_schema:
+            parser = PydanticOutputParser(pydantic_object=output_schema)
+            # Inject format instructions into the system prompt
+            format_instructions = parser.get_format_instructions()
+            messages[0] = ("system", system_prompt + "\n\n{format_instructions}")
+            prompt = ChatPromptTemplate.from_messages(messages)
+            prompt = prompt.partial(format_instructions=format_instructions)
             
-            # Simple simulation using prompt data
-            if "hidden" in rag_context.lower():
-                theme += " + Finding Hidden Gems"
-                
-            days.append(DailyPlan(dayNumber=i, theme=theme, activities=[]))
+            # Create typed chain
+            chain = prompt | self.llm | parser
+            return chain
             
-        return days
+        else:
+            # Standard string output chain
+            from langchain_core.output_parsers import StrOutputParser
+            chain = prompt | self.llm | StrOutputParser()
+            return chain
+
+    @retry_with_backoff(retries=3)
+    def invoke(
+        self, 
+        chain: RunnableSerializable, 
+        inputs: Dict[str, Any]
+    ) -> Any:
+        """
+        Executes the chain with retry logic for robust API calls.
+        """
+        try:
+            logger.info(f"Agent {self.name} started thinking...")
+            result = chain.invoke(inputs)
+            logger.info(f"Agent {self.name} completed successfully.")
+            return result
+        except Exception as e:
+            logger.error(f"Agent {self.name} encountered an error: {e}")
+            raise

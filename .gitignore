@@ -7,6 +7,7 @@ ENV/
 env.bak/
 venv.bak/
 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -33,3 +34,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+
+.tmp

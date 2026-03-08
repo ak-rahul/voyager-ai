@@ -1,23 +1,27 @@
-from typing import TypedDict, Optional, List, Dict, Any
+from typing import TypedDict, Optional, List, Dict, Any, Annotated
+import operator
 from src.models.schemas import UserPreferences, ItineraryResponse
 
 class AgentState(TypedDict):
     """
-    Central State Machine for the robust LangGraph orchestrator.
-    This tracks the entire workflow of the itinerary generation.
+    State for the Voyager AI LangGraph workflow.
     """
     # Inputs
     user_prefs: UserPreferences
     
     # Intemediary state variables
-    current_destination: Optional[str]
-    research_context: str
-    weather_forecast: Optional[str]
-    flights_data: Optional[Dict[str, Any]]
+    current_destination: str
+    destination_profile: str
+    metadata_tags: List[str]
     
-    # Feedback loop control for retry logic
-    critic_feedback: Optional[str]
-    iteration_count: int
+    # Fact Checking and Critic
+    fact_check_results: List[str]
+    critic_feedback: str
+    critic_score: float
+    
+    # Iteration control
+    revision_count: int
     
     # Final Output
+    draft_itinerary: Optional[ItineraryResponse]
     final_itinerary: Optional[ItineraryResponse]

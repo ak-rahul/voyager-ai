@@ -1,83 +1,95 @@
-import logging
 from langgraph.graph import StateGraph, END
+from typing import Dict, Any
+
 from src.graph.state import AgentState
-from src.agents.base_agent import DestinationAgent, PlannerAgent
-from src.tools.weather_tool import get_weather_forecast
-from src.tools.rag_retriever import retrieve_travel_blogs
-from src.models.schemas import ItineraryResponse, BudgetBreakdown, DailyPlan
+from src.agents.destination_analyzer import destination_analyzer
+from src.agents.metadata_recommender import metadata_recommender
+from src.agents.content_improver import content_improver
+from src.agents.reviewer_critic import reviewer_critic
+from src.agents.fact_checker import fact_checker
+from src.utils.config import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
-# --- Graph Nodes ---
-def node_destination(state: AgentState) -> dict:
-    """Determine the optimal destination if blank, else passthrough."""
-    logger.info("Executing DesignationNode")
-    dest_agent = DestinationAgent()
-    destination = dest_agent.process(state["user_prefs"])
-    return {"current_destination": destination}
+def analyze_destination_node(state: AgentState) -> Dict[str, Any]:
+    return destination_analyzer.run(state)
 
-def node_context_builder(state: AgentState) -> dict:
-    """Fetches real-time weather and localized Hidden Gems via RAG."""
-    logger.info("Executing ContextBuilderNode (Weather & RAG)")
-    dest = state["current_destination"]
-    prefs = state["user_prefs"]
+def recommend_metadata_node(state: AgentState) -> Dict[str, Any]:
+    return metadata_recommender.run(state)
+
+def generate_draft_node(state: AgentState) -> Dict[str, Any]:
+    # Increment revision count
+    rev_count = state.get("revision_count", 0) + 1
+    result = content_improver.run(state)
+    result["revision_count"] = rev_count
+    return result
+
+def fact_check_node(state: AgentState) -> Dict[str, Any]:
+    return fact_checker.run(state)
+
+def critique_node(state: AgentState) -> Dict[str, Any]:
+    return reviewer_critic.run(state)
+
+def route_after_critique(state: AgentState) -> str:
+    """
+    Decides whether the itinerary is good enough or needs revision.
+    """
+    score = state.get("critic_score", 0.0)
+    rev_count = state.get("revision_count", 0)
     
-    # Tool execution
-    weather = get_weather_forecast(dest, prefs.duration)
-    rag_docs = retrieve_travel_blogs(query=f"best local secrets in {dest}")
-    rag_context = "\\n".join([doc.page_content for doc in rag_docs])
+    logger.info(f"Routing logic: Score={score}, Revision={rev_count}")
     
-    return {
-        "weather_forecast": weather,
-        "research_context": rag_context
-    }
+    if score >= 8.0 or rev_count >= 3:
+        # High score, or we've hit our max retries
+        return "finalize"
+    else:
+        # Needs another pass by the Content Improver
+        return "generate_draft"
 
-def node_planner(state: AgentState) -> dict:
-    """Uses LLM Planner Agent to generate daily themes."""
-    logger.info("Executing PlannerNode")
-    planner = PlannerAgent()
+def finalize_node(state: AgentState) -> Dict[str, Any]:
+    """
+    Finalizes the state output.
+    """
+    draft = state.get("draft_itinerary")
+    return {"final_itinerary": draft}
+
+def build_workflow() -> StateGraph:
+    """Builds and compiles the Multi-Agent LangGraph workflow."""
+    logger.info("Building workflow graph...")
     
-    days = planner.process(
-        state["current_destination"], 
-        state["user_prefs"], 
-        state["weather_forecast"], 
-        state["research_context"]
+    builder = StateGraph(AgentState)
+    
+    # Add Nodes
+    builder.add_node("analyze_destination", analyze_destination_node)
+    builder.add_node("recommend_metadata", recommend_metadata_node)
+    builder.add_node("generate_draft", generate_draft_node)
+    builder.add_node("fact_check", fact_check_node)
+    builder.add_node("critique", critique_node)
+    builder.add_node("finalize", finalize_node)
+    
+    # Define Edges (The standard path)
+    builder.set_entry_point("analyze_destination")
+    builder.add_edge("analyze_destination", "recommend_metadata")
+    builder.add_edge("recommend_metadata", "generate_draft")
+    builder.add_edge("generate_draft", "fact_check")
+    builder.add_edge("fact_check", "critique")
+    
+    # Define Conditional Branches
+    builder.add_conditional_edges(
+        "critique",
+        route_after_critique,
+        {
+            "generate_draft": "generate_draft",
+            "finalize": "finalize"
+        }
     )
     
-    # Mock generation of final itinerary to meet robust schema requirement
-    budget_mock = BudgetBreakdown(
-        flightsTransit=600,
-        accommodation=state["user_prefs"].duration * 100,
-        foodDining=state["user_prefs"].duration * 60,
-        activities=state["user_prefs"].duration * 40,
-        total=600 + (state["user_prefs"].duration * 200)
-    )
+    builder.add_edge("finalize", END)
     
-    summary = f"A beautiful {state['user_prefs'].duration}-day {state['user_prefs'].style} journey in {state['current_destination']} tailored to a {state['user_prefs'].budget} budget. Includes RAG insights and weather adaptations!"
+    # Compile the graph
+    graph = builder.compile()
+    logger.info("Workflow successfully compiled.")
+    return graph
 
-    final_itinerary = ItineraryResponse(
-        destination=state["current_destination"],
-        summary=summary,
-        days=days,
-        budget=budget_mock
-    )
-    
-    return {"final_itinerary": final_itinerary}
-
-# --- Graph Compilation ---
-def create_workflow() -> StateGraph:
-    """Builds and compiles the Master LangGraph."""
-    logger.info("Compiling Enterprise Master Workflow DAG")
-    workflow = StateGraph(AgentState)
-    
-    workflow.add_node("DestinationAgent", node_destination)
-    workflow.add_node("ContextBuilder", node_context_builder)
-    workflow.add_node("PlannerAgent", node_planner)
-    
-    # Define Edges (Directed Acyclic Graph logic)
-    workflow.set_entry_point("DestinationAgent")
-    workflow.add_edge("DestinationAgent", "ContextBuilder")
-    workflow.add_edge("ContextBuilder", "PlannerAgent")
-    workflow.add_edge("PlannerAgent", END)
-    
-    return workflow.compile()
+# Expose compiled graph
+workflow = build_workflow()
