@@ -1,7 +1,10 @@
 import os
 import logging
 from typing import Optional
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
+
+load_dotenv() # Force load environment variables
 
 class Settings(BaseSettings):
     """

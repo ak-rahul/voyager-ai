@@ -1,4 +1,7 @@
 import streamlit as st
+from dotenv import load_dotenv
+load_dotenv() # Force load .env file
+
 from src.models.schemas import UserPreferences
 from src.main import run_planner
 import time
