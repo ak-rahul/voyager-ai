@@ -17,7 +17,7 @@ class BaseAgent:
     Handles LLM initialization, prompt rendering, and structured parsing execution.
     """
     
-    def __init__(self, name: str, model_name: str = "llama3-70b-8192", temperature: float = 0.2):
+    def __init__(self, name: str, model_name: str = "llama-3.3-70b-versatile", temperature: float = 0.2):
         self.name = name
         self.llm = ChatGroq(
             temperature=temperature,

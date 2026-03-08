@@ -11,7 +11,7 @@ class ContentImprover(BaseAgent):
     """
     def __init__(self):
         # We might use the 70b model here for complex reasoning
-        super().__init__(name="ContentImprover", model_name="llama3-70b-8192")
+        super().__init__(name="ContentImprover", model_name="llama-3.3-70b-versatile")
         self.system_prompt = """
         You are a Master Travel Planner. Your goal is to generate a detailed, highly 
         personalized day-by-day itinerary based on the destination profile, user preferences, 

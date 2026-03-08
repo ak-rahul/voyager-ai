@@ -17,7 +17,7 @@ class FactChecker(BaseAgent):
     Agent responsible for verifying specific attractions mentioned in the itinerary.
     """
     def __init__(self):
-        super().__init__(name="FactChecker", model_name="llama3-70b-8192")
+        super().__init__(name="FactChecker", model_name="llama-3.3-70b-versatile")
         self.system_prompt = """
         You are an expert Fact Checker for a prominent travel publication.
         Your job is to take the drafted itinerary and cross-reference the major attractions

@@ -15,7 +15,7 @@ class ReviewerCritic(BaseAgent):
     Agent responsible for evaluating the draft itinerary and providing feedback.
     """
     def __init__(self):
-        super().__init__(name="ReviewerCritic", model_name="llama3-70b-8192")
+        super().__init__(name="ReviewerCritic", model_name="llama-3.3-70b-versatile")
         self.system_prompt = """
         You are a strict, hyper-critical Travel Critic and Logistics Expert.
         
