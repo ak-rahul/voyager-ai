@@ -1,11 +1,11 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional
+from pydantic import BaseModel, Field, model_validator
+from typing import List, Optional, Literal
 
 class UserPreferences(BaseModel):
     destination: Optional[str] = Field(None, description="The desired destination (can be empty for recommendations)")
     duration: int = Field(..., description="Number of days for the trip")
-    budget: str = Field(..., description="Budget level: budget, moderate, or luxury")
-    style: str = Field(..., description="Travel style: culture, nature, relaxation, food, or party")
+    budget: Literal["budget", "moderate", "luxury"] = Field(..., description="Budget level")
+    style: Literal["culture", "nature", "relaxation", "food", "adventure"] = Field(..., description="Travel style")
 
 class Activity(BaseModel):
     timeOfDay: str = Field(description="Morning, Afternoon, or Evening")
@@ -24,6 +24,13 @@ class BudgetBreakdown(BaseModel):
     foodDining: int = Field(description="Estimated food costs")
     activities: int = Field(description="Estimated activities/tours costs")
     total: int = Field(description="Total estimated cost")
+
+    @model_validator(mode="after")
+    def check_total(self) -> "BudgetBreakdown":
+        expected_total = self.flightsTransit + self.accommodation + self.foodDining + self.activities
+        if self.total != expected_total:
+            raise ValueError(f"Total {self.total} does not match sum of components {expected_total}")
+        return self
 
 class ItineraryResponse(BaseModel):
     destination: str = Field(description="The chosen or recommended destination")

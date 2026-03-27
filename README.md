@@ -11,8 +11,8 @@ This project implements an advanced **Plan-and-Solve with Actor-Critic** archite
 1. **Destination Analyzer:** Acts as the researcher. Gathers real-time intelligence about the destination using web search tools, identifying attractions, travel risks, and optimal visiting months.
 2. **Metadata Recommender:** Acts as the categorizer. Determines the "vibe" and complexity of the trip based on user inputs.
 3. **Content Improver (Actor):** Generates the actual day-by-day itinerary draft. It must adapt to restrictive feedback from the Critic.
-4. **Fact Checker:** Extracts the top generated attractions and cross-references them against real-world data (via Tavily Search) to ensure they actually exist and make sense geographically.
-5. **Reviewer Critic:** Evaluates the draft itinerary against the user's constraints (Budget, Duration, Style). If it fails to meet the threshold, it forces the Content Improver to rewrite the draft.
+4. **Fact Checker:** Scours the live internet (via Tavily Search) to cross-reference the draft itinerary against real-world data, ensuring venues actually exist, are open, and match the budget.
+5. **Reviewer Critic:** Evaluates the draft itinerary directly against the Fact Checker's live intelligence and the user's constraints using a strict point-deduction rubric. If it scores below a 8.0/10, it forces the Content Improver to rewrite the draft. Includes graceful UI exhaustion warnings if impossible constraints are provided.
 
 ```mermaid
 graph TD
@@ -30,8 +30,8 @@ graph TD
 * **Core Engine:** Python 3.11+, LangChain, LangGraph
 * **LLM Provider:** Groq (Llama 3 70B & 8B for ultra-fast, cheap inference necessary for multi-agent loops)
 * **Tools:** Tavily (Optimized Agentic Web Search)
-* **Frontend:** Streamlit 
-* **Validation:** Pydantic (Strict schema enforcement for agent outputs)
+* **Frontend:** Streamlit (Custom Premium Glassmorphism UI)
+* **Validation:** Pydantic & Pydantic-Settings (Strict schema and environment variable enforcement)
 * **CI/CD:** GitHub Actions (Automated pytest & flake8)
 
 ## 🗂️ Project Structure
@@ -84,5 +84,5 @@ python -m streamlit run app.py
 
 ## 🧠 Why This Project Stands Out (For Recruiters/Hiring Managers)
 * **Stateful Execution:** Uses a state graph instead of standard chain execution, allowing for infinite loops, internal memory, and human-in-the-loop capabilities.
-* **Resilient Tooling:** Implements custom `retry` and `circuit_breaker` decorators to handle volatile external APIs gracefully.
-* **Separation of Concerns:** Deeply decoupling the "Actor" (doing the work) from the "Critic" (evaluating the work) dramatically reduces LLM hallucination and improves adherence to complex user prompts.
+* **Resilient Tooling & Architecture:** Implements custom `retry` and `circuit_breaker` decorators to handle volatile external APIs gracefully. Employs lazy LLM instantiation to protect the application from environment-driven crash loops.
+* **Adversarial Multi-Agent Validation:** Deeply decouples the "Actor" (doing the work) from the "Critic" (evaluating the work). The Critic leverages live internet data from the Fact Checker to ruthlessly strip points for LLM hallucinations, ensuring structural and geographical accuracy.

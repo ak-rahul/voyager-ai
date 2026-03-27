@@ -16,12 +16,14 @@ def run_planner(prefs: UserPreferences) -> ItineraryResponse:
     # Initialize State
     initial_state = {
         "user_prefs": prefs,
-        "current_destination": None,
-        "research_context": "",
-        "weather_forecast": None,
-        "flights_data": None,
-        "critic_feedback": None,
-        "iteration_count": 0,
+        "current_destination": prefs.destination,
+        "destination_profile": "",
+        "metadata_tags": [],
+        "fact_check_results": [],
+        "critic_feedback": "",
+        "critic_score": 0.0,
+        "revision_count": 0,
+        "draft_itinerary": None,
         "final_itinerary": None
     }
     

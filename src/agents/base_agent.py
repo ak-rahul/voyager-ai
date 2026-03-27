@@ -19,13 +19,20 @@ class BaseAgent:
     
     def __init__(self, name: str, model_name: str = "llama-3.3-70b-versatile", temperature: float = 0.2):
         self.name = name
-        self.llm = ChatGroq(
-            temperature=temperature,
-            model_name=model_name,
-            api_key=settings.GROQ_API_KEY,
-            max_tokens=4096
-        )
-        logger.info(f"Initialized agent {self.name} with model {model_name}")
+        self.model_name = model_name
+        self.temperature = temperature
+
+    @property
+    def llm(self):
+        if not hasattr(self, "_llm"):
+            self._llm = ChatGroq(
+                temperature=self.temperature,
+                model_name=self.model_name,
+                api_key=settings.GROQ_API_KEY,
+                max_tokens=4096
+            )
+            logger.info(f"Initialized agent {self.name} with model {self.model_name}")
+        return self._llm
 
     def create_chain(
         self, 
@@ -36,18 +43,15 @@ class BaseAgent:
         Creates a LangChain runnable chain. If output_schema is provided, 
         it enforces structured Pydantic output.
         """
-        messages = [
-            ("system", system_prompt),
-            ("human", "{human_input}")
-        ]
-        
-        prompt = ChatPromptTemplate.from_messages(messages)
-        
         if output_schema:
             parser = PydanticOutputParser(pydantic_object=output_schema)
-            # Inject format instructions into the system prompt
             format_instructions = parser.get_format_instructions()
-            messages[0] = ("system", system_prompt + "\n\n{format_instructions}")
+            
+            messages = [
+                ("system", system_prompt + "\n\n{format_instructions}"),
+                ("human", "{human_input}")
+            ]
+            
             prompt = ChatPromptTemplate.from_messages(messages)
             prompt = prompt.partial(format_instructions=format_instructions)
             
@@ -56,6 +60,12 @@ class BaseAgent:
             return chain
             
         else:
+            messages = [
+                ("system", system_prompt),
+                ("human", "{human_input}")
+            ]
+            prompt = ChatPromptTemplate.from_messages(messages)
+            
             # Standard string output chain
             from langchain_core.output_parsers import StrOutputParser
             chain = prompt | self.llm | StrOutputParser()

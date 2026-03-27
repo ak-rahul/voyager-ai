@@ -2,7 +2,7 @@ import os
 import logging
 from typing import Optional
 from dotenv import load_dotenv
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv() # Force load environment variables
 
@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     Enterprise-level configuration management using pydantic_settings.
     Automatically loads from .env or environment variables.
     """
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
     
     # Project Info
     PROJECT_NAME: str = "WanderAI Travel Planner"
@@ -26,10 +27,6 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     TIMEOUT_SECONDS: int = 30
     MAX_RETRIES: int = 3
-    
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
 
 # Global dependency
 settings = Settings()

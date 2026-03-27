@@ -7,7 +7,7 @@ name = "voyager-ai"
 version = "1.0.0"
 description = "An Autonomous, Stateful, Multi-Agent Travel Planning Platform"
 authors = [
-    {name = "Rahul", email = "rahul@example.com"}
+    {name = "Rahul"}
 ]
 readme = "README.md"
 requires-python = ">=3.11"

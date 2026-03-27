@@ -3,7 +3,8 @@ from pydantic import BaseModel, Field
 
 from src.agents.base_agent import BaseAgent
 from src.tools.web_search_tool import web_search
-from src.graph.state import AgentState, ItineraryResponse
+from src.graph.state import AgentState
+from src.models.schemas import ItineraryResponse
 from src.utils.config import setup_logger
 
 logger = setup_logger(__name__)

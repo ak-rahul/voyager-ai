@@ -22,16 +22,16 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-    --primary-color: #8b5cf6;
-    --secondary-color: #a78bfa;
-    --accent-color: #ec4899;
+    --primary-color: #6366f1;
+    --secondary-color: #8b5cf6;
+    --accent-color: #f43f5e;
     --success-color: #10b981;
     --dark-bg: #0f172a;
     --dark-card: #1e293b;
     --dark-surface: #334155;
 }
 
-html, body, [class*="css"], p, span, div, h1, h2, h3, h4, label, .stMarkdown {
+html, body, p, h1, h2, h3, h4, label, li, .stMarkdown {
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
@@ -47,19 +47,49 @@ html, body, [class*="css"], p, span, div, h1, h2, h3, h4, label, .stMarkdown {
 }
 
 [data-testid="stSidebar"] {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
-    border-right: 1px solid rgba(139, 92, 246, 0.2) !important;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5) !important;
+    background: #0f172a !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-testid="stSidebar"] h2 {
+    background: none !important;
+    -webkit-text-fill-color: #f1f5f9 !important;
+    color: #f1f5f9 !important;
+    font-size: 1.5rem !important;
+    border-bottom: 2px solid #6366f1 !important;
+    margin-bottom: 1.5rem !important;
+}
+
+[data-testid="stSidebar"] .stForm {
+    background: transparent !important;
+    border: 1px solid rgba(148, 163, 184, 0.1) !important;
+    padding: 1rem !important;
+    box-shadow: none !important;
+}
+
+[data-testid="stSidebarNav"] {
+    background: transparent !important;
+}
+
+.stSidebar [data-testid="stMarkdownContainer"] p {
+    font-size: 0.9rem !important;
+    color: #94a3b8 !important;
+    line-height: 1.6 !important;
 }
 
 /* Typography Gradient */
 h1 {
-    background: linear-gradient(135deg, #a78bfa 0%, #ec4899 50%, #8b5cf6 100%) !important;
+    margin-top: -30px !important;
+    color: #f1f5f9 !important;
+    font-weight: 900 !important;
+    letter-spacing: -1.5px !important;
+    text-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+}
+.title-gradient {
+    background: linear-gradient(135deg, #fff 0%, #a78bfa 50%, #8b5cf6 100%) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     background-clip: text !important;
-    font-weight: 900 !important;
-    letter-spacing: -1px !important;
 }
 h2 {
     color: #f1f5f9 !important;
@@ -145,18 +175,17 @@ ul[data-baseweb="menu"] li:hover {
 
 /* Metric Cards */
 [data-testid="metric-container"] {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    background: #1e293b !important;
     border-radius: 18px !important;
     padding: 1.5rem !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
-    border-top: 4px solid #8b5cf6 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(148, 163, 184, 0.1) !important;
+    border-top: 2px solid #6366f1 !important;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    border: 1px solid rgba(139, 92, 246, 0.2) !important;
 }
 [data-testid="metric-container"]:hover {
     transform: translateY(-5px) scale(1.02) !important;
-    box-shadow: 0 15px 50px rgba(139, 92, 246, 0.4) !important;
-    border-color: rgba(139, 92, 246, 0.5) !important;
+    border-color: rgba(99, 102, 241, 0.4) !important;
 }
 [data-testid="metric-container"] > div > div > div > p {
     color: #94a3b8 !important; 
@@ -171,18 +200,18 @@ ul[data-baseweb="menu"] li:hover {
 }
 
 /* Containers (Status, Form, etc.) */
-[data-testid="stForm"], [data-testid="stStatusWidget"] {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+[data-testid="stForm"] {
+    background: #1e293b !important;
     border-radius: 20px !important;
-    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
     padding: 1.5rem !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
     transition: all 0.3s ease !important;
 }
-[data-testid="stForm"]:hover, [data-testid="stStatusWidget"]:hover {
+[data-testid="stForm"]:hover {
     transform: translateY(-5px) !important;
-    box-shadow: 0 15px 50px rgba(139, 92, 246, 0.3) !important;
-    border-color: rgba(139, 92, 246, 0.5) !important;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(139, 92, 246, 0.3) !important;
 }
 [data-testid="stStatusWidget"] [data-testid="stMarkdown"] p {
      color: #cbd5e1 !important;
@@ -190,19 +219,15 @@ ul[data-baseweb="menu"] li:hover {
 
 /* Tabs */
 .stTabs [data-baseweb="tab-list"] {
-    background: #1e293b !important;
-    border-radius: 16px !important;
-    padding: 8px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
-    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    background: transparent !important;
     gap: 8px !important;
 }
 .stTabs [data-baseweb="tab"] {
-    background: transparent !important;
-    border: none !important;
+    background: #1e293b !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
     color: #94a3b8 !important;
     font-weight: 600 !important;
-    padding: 12px 24px !important;
+    padding: 8px 16px !important;
     border-radius: 12px !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
@@ -214,7 +239,6 @@ ul[data-baseweb="menu"] li:hover {
     background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%) !important;
     color: white !important;
     box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5) !important;
-    border-bottom: none !important;
 }
 
 /* Expanders */
@@ -246,7 +270,8 @@ ul[data-baseweb="menu"] li:hover {
     border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
 }
 .stMarkdown strong {
-    color: #a78bfa !important;
+    color: #f1f5f9 !important;
+    font-weight: 600;
 }
 
 /* Scrollbars */
@@ -285,29 +310,21 @@ def add_log(message: str):
     st.session_state.logs.append(f"{time.strftime('%H:%M:%S')} - {message}")
 
 # --- HEADER SECTION ---
-col_head1, col_head2 = st.columns([1, 5])
-with col_head1:
-    st.image("https://cdn-icons-png.flaticon.com/512/3141/3141029.png", width=80) # Placeholder pleasant icon
-with col_head2:
-    st.title("Voyager AI")
-    st.markdown("**Your Autonomous, Multi-Agent Travel Consultant Engine**")
-
-st.divider()
+st.markdown("<h1 style='text-align: center;'>🌌 <span class='title-gradient'>Voyager AI</span></h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 1.15rem; color: #94a3b8;'>Your Autonomous, Multi-Agent Travel Consultant Engine</p>", unsafe_allow_html=True)
 
 # --- SIDEBAR CONFIGURATION ---
 with st.sidebar:
-    st.header("✈️ Trip Parameters")
-    st.markdown("Specify your dream vacation, and our agents will build it from scratch.")
+    st.markdown("<h2 style='border:none; border-bottom: 2px solid #6366f1; padding-bottom:10px;'>✈️ Trip Parameters</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94a3b8; font-size: 0.95rem; margin-bottom: 2rem;'>Specify your destination to generate a curated travel experience.</p>", unsafe_allow_html=True)
     
     with st.form("trip_form"):
-        destination = st.text_input("Destination", placeholder="e.g., Kyoto, Japan", help="City, Country, or specific Region")
+        destination = st.text_input("Destination", placeholder="e.g., Tokyo, Japan")
         duration = st.slider("Duration (Days)", min_value=1, max_value=14, value=5)
         
-        col_f1, col_f2 = st.columns(2)
-        with col_f1:
-            budget = st.selectbox("Budget Tier", ["budget", "moderate", "luxury"])
-        with col_f2:
-            style = st.selectbox("Travel Style", ["culture", "nature", "relaxation", "food", "adventure"])
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        budget = st.selectbox("Budget Tier", ["budget", "moderate", "luxury"])
+        style = st.selectbox("Travel Style", ["culture", "nature", "relaxation", "food", "adventure"])
             
         st.markdown("<br>", unsafe_allow_html=True)
         submitted = st.form_submit_button("Launch Agents 🚀")
@@ -341,6 +358,7 @@ if submitted and destination:
     # Execute Graph Workflow within a stylized status container
     with st.status("Initializing LangGraph Engine...", expanded=True) as status:
         try:
+            final_result = None
             # LangGraph provides a generator for streaming execution steps
             for event in workflow.stream(initial_state):
                 for node_name, state_update in event.items():
@@ -372,7 +390,9 @@ if submitted and destination:
                     
                     final_result = state_update
             
-            st.session_state.itinerary = final_result.get("final_itinerary")
+            if final_result is not None:
+                st.session_state.itinerary = final_result.get("final_itinerary")
+                st.session_state.final_score = final_result.get("critic_score", 10.0)
             status.update(label="Workflow Complete. Final Itinerary Ready!", state="complete", expanded=False)
             
         except Exception as e:
@@ -384,7 +404,11 @@ st.markdown("<br>", unsafe_allow_html=True)
 # --- DISPLAY RESULTS IN TABS ---
 if st.session_state.itinerary:
     itinerary = st.session_state.itinerary
+    score = st.session_state.get("final_score", 10.0)
     
+    if score < 8.0:
+        st.warning(f"⚠️ **Compromised Itinerary Warning:** The agents hit the maximum retries before passing the critic threshold (Final Critic Score: {score}/10). The itinerary below may contain minor unverified logistics or budget mismatches.")
+
     st.header(f"✨ Custom Itinerary: {itinerary.destination}")
     st.markdown(f"*{itinerary.summary}*")
     

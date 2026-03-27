@@ -12,6 +12,9 @@ def test_base_agent_initialization(mock_chatgroq):
     agent = BaseAgent(name="TestAgent", model_name="test-model", temperature=0.5)
     
     assert agent.name == "TestAgent"
+    # Trigger lazy initialization
+    _ = agent.llm
+    
     mock_chatgroq.assert_called_once_with(
         temperature=0.5,
         model_name="test-model",

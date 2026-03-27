@@ -16,7 +16,7 @@ def test_metadata_recommender(mock_invoke):
         trip_complexity_score=4
     )
     
-    prefs = UserPreferences(destination="Rome", duration=4, budget="high", style="culture")
+    prefs = UserPreferences(destination="Rome", duration=4, budget="luxury", style="culture")
     state: AgentState = {
         "user_prefs": prefs,
         "current_destination": "Rome",

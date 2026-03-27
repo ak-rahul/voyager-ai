@@ -93,3 +93,6 @@ def build_workflow() -> StateGraph:
 
 # Expose compiled graph
 workflow = build_workflow()
+
+# Alias for main.py
+create_workflow = build_workflow

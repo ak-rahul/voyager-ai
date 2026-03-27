@@ -38,7 +38,7 @@ def test_reviewer_critic_valid(mock_invoke):
 def test_reviewer_critic_missing_draft():
     from src.agents.reviewer_critic import reviewer_critic
     state: AgentState = {
-        "user_prefs": UserPreferences(destination="Null", duration=1, budget="N", style="N"),
+        "user_prefs": UserPreferences(destination="Null", duration=1, budget="budget", style="culture"),
         "current_destination": "Null",
         "destination_profile": "",
         "metadata_tags": [],

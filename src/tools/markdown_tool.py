@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from src.graph.state import ItineraryResponse
+from src.models.schemas import ItineraryResponse
 
 class MarkdownTool:
     """Utility for generating beautiful markdown itineraries from Pydantic models."""

@@ -29,7 +29,7 @@ def retry_with_backoff(
                     
                     # Exponential backoff with full jitter
                     sleep_time = min(backoff_in_seconds * (2 ** x), max_backoff_in_seconds)
-                    jitter = random.uniform(0, sleep_time)
+                    jitter = max(0.05, random.uniform(0, sleep_time))
                     
                     logger.warning(
                         f"Retrying {func.__name__} in {jitter:.2f} seconds "

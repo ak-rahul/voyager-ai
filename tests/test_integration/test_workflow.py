@@ -1,7 +1,10 @@
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from src.graph.state import AgentState
 from src.models.schemas import UserPreferences, ItineraryResponse
+
+class MagicMockItinerary:
+    pass
 
 @patch('src.agents.destination_analyzer.destination_analyzer.run')
 @patch('src.agents.metadata_recommender.metadata_recommender.run')
@@ -17,7 +20,7 @@ def test_full_workflow_happy_path(mock_critic, mock_fact, mock_improver, mock_me
     mock_fact.return_value = {"fact_check_results": []}
     mock_critic.return_value = {"critic_score": 9.0, "critic_feedback": "Perfect"}
     
-    prefs = UserPreferences(destination="Austin", duration=2, budget="low", style="music")
+    prefs = UserPreferences(destination="Austin", duration=2, budget="budget", style="culture")
     
     initial_state = {
         "user_prefs": prefs,
@@ -41,5 +44,4 @@ def test_full_workflow_happy_path(mock_critic, mock_fact, mock_improver, mock_me
     assert mock_fact.call_count == 1
     assert mock_critic.call_count == 1
 
-class MagicMockItinerary:
-    pass
+    assert mock_critic.call_count == 1

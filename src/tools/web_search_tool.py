@@ -1,5 +1,8 @@
 import os
-from langchain_community.tools.tavily_search import TavilySearchResults
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    from langchain_community.tools.tavily_search import TavilySearchResults
 from src.utils.config import settings
 from src.utils.retry import retry_with_backoff
 
@@ -12,7 +15,13 @@ class WebSearchTool:
     """Wrapper around Tavily search specifically tailored for travel research."""
     
     def __init__(self, max_results: int = 5):
-        self.search_tool = TavilySearchResults(max_results=max_results)
+        if not settings.TAVILY_API_KEY:
+            raise ValueError("TAVILY_API_KEY must be set in environment variables to use WebSearchTool.")
+        
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.search_tool = TavilySearchResults(max_results=max_results)
         
     @retry_with_backoff(retries=3)
     def search(self, query: str) -> str:
